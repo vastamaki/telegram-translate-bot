@@ -12,7 +12,7 @@ bot.on("message", async (msg) => {
   const message = msg.text;
 
   const language = lngDetector.detect(message, 1);
-  if (language[0][0] === "finnish") {
+  if (language[0] && (language[0][0] === "finnish")) {
     const result = await translate(message, {
       tld: "pl",
       to: "pl",
@@ -20,7 +20,7 @@ bot.on("message", async (msg) => {
     const data = result.data[0];
     bot.sendMessage(chatId, data);
   }
-  if (language[0][0] === "polish") {
+  if (language[0] && (language[0][0] === "polish")) {
     const result = await translate(message, {
       tld: "fi",
       to: "fi",
