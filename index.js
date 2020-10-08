@@ -23,11 +23,11 @@ bot.on("message", async (msg) => {
   const message = msg.text;
 
   if (message.includes("!stats")) {
-    sendStats(chatId);
+    const amount = message.split(" ");
+    sendStats(chatId, amount[1]);
   }
 
   const language = lngDetector.detect(message, 1);
-  console.log(language);
   if (language[0] && language[0][0] === "finnish") {
     const result = await translate(message, {
       tld: "pl",
@@ -62,16 +62,18 @@ const saveToDb = (chatId, text, detected_language, accuracy, date) => {
     .run();
 };
 
-const sendStats = (chatId) => {
+const sendStats = (chatId, amount) => {
   let message = "";
   const last_10_rows = sql
     .prepare(
-      `SELECT * FROM (SELECT * FROM translations WHERE chatId = ? LIMIT 10) ORDER BY date DESC`
+      `SELECT * FROM (SELECT * FROM translations WHERE chatId = ? LIMIT ?) ORDER BY date DESC`
     )
-    .all(chatId);
+    .all(chatId, amount || 5);
 
-  last_10_rows.forEach((row) => {
-    message += `${row.text} ${row.detected_language} ${row.accuracy}\n`;
+  last_10_rows.forEach((row, index) => {
+    message += `${index + 1}: ${row.text} ${row.detected_language} ${
+      row.accuracy
+    }\n\n`;
   });
   const stats = last_10_rows ? message : "No stats yet :(";
   bot.sendMessage(chatId, stats);
