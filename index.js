@@ -44,11 +44,12 @@ bot.on("message", async (msg) => {
     const data = result.data[0];
     bot.sendMessage(chatId, data);
   }
+
   saveToDb(
     chatId,
     message,
-    language > 1 ? language[0][0] : undefined,
-    language.length > 1 ? language[0][1] : undefined,
+    language.length >= 1 ? language[0][0] : undefined,
+    language.length >= 1 ? language[0][1] : undefined,
     new Date()
   );
 });
