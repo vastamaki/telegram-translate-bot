@@ -48,7 +48,7 @@ bot.on("message", async (msg) => {
     chatId,
     message,
     language.length >= 1 ? language[0][0] : undefined,
-    language.length >= 1 ? language[0][1].substring(0, 4) : undefined
+    language.length >= 1 ? language[0][1].toString().substr(0, 5) : undefined
   );
 });
 
