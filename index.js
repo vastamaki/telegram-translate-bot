@@ -3,8 +3,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const LanguageDetect = require("languagedetect");
 const SQLite = require("better-sqlite3");
 const lngDetector = new LanguageDetect();
-
-const token = "YOUR_TOKEN_HERE";
+const { token } = require("./secrets.json");
 
 const bot = new TelegramBot(token, { polling: true });
 
@@ -13,7 +12,7 @@ const sql = new SQLite(`./data.sqlite`);
 (async function () {
   sql
     .prepare(
-      `CREATE TABLE IF NOT EXISTS translations(chatId STRING, text STRING, detected_language STRING, accuracy STRING, date STRING)`
+      `CREATE TABLE IF NOT EXISTS translations(chatId STRING, text STRING, detected_language STRING, accuracy STRING, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)`
     )
     .run();
 })();
@@ -49,15 +48,14 @@ bot.on("message", async (msg) => {
     chatId,
     message,
     language.length >= 1 ? language[0][0] : undefined,
-    language.length >= 1 ? language[0][1] : undefined,
-    new Date()
+    language.length >= 1 ? language[0][1] : undefined
   );
 });
 
-const saveToDb = (chatId, text, detected_language, accuracy, date) => {
+const saveToDb = (chatId, text, detected_language, accuracy) => {
   sql
     .prepare(
-      `INSERT INTO translations (chatId, text, detected_language, accuracy, date) VALUES ('${chatId}', '${text}', '${detected_language}', '${accuracy}', '${date}')`
+      `INSERT INTO translations (chatId, text, detected_language, accuracy) VALUES ('${chatId}', '${text}', '${detected_language}', '${accuracy}')`
     )
     .run();
 };
@@ -66,7 +64,7 @@ const sendStats = (chatId, amount) => {
   let message = "";
   const last_10_rows = sql
     .prepare(
-      `SELECT * FROM (SELECT * FROM translations WHERE chatId = ? LIMIT ?) ORDER BY date DESC`
+      `SELECT * FROM translations WHERE chatId = ? ORDER BY timestamp DESC LIMIT ?`
     )
     .all(chatId, amount || 5);
 
