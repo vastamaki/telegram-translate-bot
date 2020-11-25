@@ -12,17 +12,35 @@ app.post("/", function (req, res) {
   res.end(JSON.stringify({ response: "OK" }));
 });
 
-const runci = () => {
-   console.log('Git reset...')
-  exec("git -C ~/apps/telegram-translate-bot reset --hard", callback);
-   console.log('Git clean...')
-   exec("git -C ~/apps/telegram-translate-bot clean -df", callback);
-   console.log('Git pull...')
-   exec("git -C ~/apps/telegram-translate-bot pull -f", callback);
-   console.log('Npm build prod...')
-   exec("npm -C ~/apps/telegram-translate-bot install --production", callback);
-   console.log('Restart app...')
-   exec("pm2 restart 0", callback);
+function aexec(command, options = { cwd: process.cwd() }) {
+  return new Promise((done, failed) => {
+    exec(command, { ...options }, (err, stdout, stderr) => {
+      if (err) {
+        err.stdout = stdout;
+        err.stderr = stderr;
+        failed(err);
+        return;
+      }
+
+      done({ stdout, stderr });
+    });
+  });
+}
+
+const runci = async () => {
+  console.log("Git reset...");
+  await aexec("git -C ~/apps/telegram-translate-bot reset --hard", callback);
+  console.log("Git clean...");
+  await aexec("git -C ~/apps/telegram-translate-bot clean -df", callback);
+  console.log("Git pull...");
+  await aexec("git -C ~/apps/telegram-translate-bot pull -f", callback);
+  console.log("Npm build prod...");
+  await aexec(
+    "npm -C ~/apps/telegram-translate-bot install --production",
+    callback
+  );
+  console.log("Restart app...");
+  await aexec("pm2 restart 0", callback);
 };
 
 const callback = (error, stdout, stderr) => {
@@ -34,5 +52,5 @@ var server = app.listen(app.get("port"), function () {
   var host = server.address().address;
   var port = server.address().port;
 
-  console.log(`Node.js API app listening at ${host, port}`);
+  console.log(`Node.js API app listening at ${(host, port)}`);
 });
