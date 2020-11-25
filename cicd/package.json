@@ -1,0 +1,13 @@
+{
+  "name": "raspberry-pi-cicd",
+  "version": "1.0.0",
+  "description": "Raspberry pi cicd",
+  "author": "Viljami Vastamäki <viljami.vastamaki@tutanota.com>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
