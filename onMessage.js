@@ -12,7 +12,8 @@ const onMessage = async (msg, bot) => {
       const stats = getStats(chatId, amount[1]);
       bot.sendMessage(chatId, stats);
       break;
-
+    case (message.match(/^hey hackerman/) || {}).input:
+      bot.sendMessage(chatId, "Hey! :)")
     default:
       break;
   }
