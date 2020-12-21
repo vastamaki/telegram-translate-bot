@@ -1,6 +1,8 @@
-const translate = require("google-translate-open-api").default;
-const LanguageDetect = require("languagedetect");
-const lngDetector = new LanguageDetect();
+const { Translate } = require("@google-cloud/translate").v2;
+const { gcloud } = require("./secrets.json");
+const translate = new Translate({
+  key: gcloud,
+});
 const { saveToDb, getStats } = require("./helpers.js");
 
 const onMessage = async (msg, bot) => {
@@ -13,27 +15,23 @@ const onMessage = async (msg, bot) => {
       bot.sendMessage(chatId, stats);
       break;
     case (message.match(/^hey hackerman/) || {}).input:
-      bot.sendMessage(chatId, "Hey! :)")
+      bot.sendMessage(chatId, "Hey! :)");
     default:
       break;
   }
 
-  const language = lngDetector.detect(message, 1);
-  if (language[0] && language[0][0] === "finnish") {
-    const result = await translate(message, {
-      tld: "pl",
-      to: "pl",
-    });
-    const data = result.data[0];
-    bot.sendMessage(chatId, data);
-  }
-  if (language[0] && language[0][0] === "polish") {
-    const result = await translate(message, {
-      tld: "fi",
-      to: "fi",
-    });
-    const data = result.data[0];
-    bot.sendMessage(chatId, data);
+  let [detection] = await translate.detect(message);
+
+  if (
+    detection.language &&
+    (detection.language === "fi" || detection.language === "pl")
+  ) {
+    const [translation] = await translate.translate(
+      message,
+      detection.language === "fi" ? "pl" : "fi"
+    );
+    console.log(detection.language, translation);
+    bot.sendMessage(chatId, translation);
   }
 
   saveToDb(
@@ -41,11 +39,7 @@ const onMessage = async (msg, bot) => {
       chatId,
       username: msg.chat.username,
       message,
-      language: language.length >= 1 ? language[0][0] : undefined,
-      accuracy:
-        language.length >= 1
-          ? language[0][1].toString().substr(0, 5)
-          : undefined,
+      language: detection.language ? detection.language : undefined,
     },
     "translations"
   );
