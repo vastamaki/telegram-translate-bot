@@ -12,7 +12,7 @@ const onMessage = async (msg, bot) => {
   const chatId = msg.chat.id;
   const message = msg.text;
   switch (message) {
-    case message.match(/^!optout/).input:
+    case (message.match(/^!optout/) || {}).input:
       saveToDb(
         {
           userId,
