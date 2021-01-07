@@ -3,12 +3,28 @@ const { gcloud } = require("./secrets.json");
 const translate = new Translate({
   key: gcloud,
 });
-const { saveToDb, getStats } = require("./helpers.js");
+const { saveToDb, getStats, hasUserOptedOut } = require("./helpers.js");
 
 const onMessage = async (msg, bot) => {
+  const optOut = hasUserOptedOut(msg.from.id);
+  if (optOut) return;
+
   const chatId = msg.chat.id;
   const message = msg.text;
   switch (message) {
+    case message.match(/^!optout/).input:
+      saveToDb(
+        {
+          userId,
+          reason: message.replace("!optout", ""),
+        },
+        "optouts"
+      );
+      bot.sendMessage(
+        chatId,
+        "Hey, the spyware is now disabled from your account."
+      );
+      break;
     case (message.match(/^!stats/) || {}).input:
       const amount = message.split(" ");
       const stats = getStats(chatId, amount[1]);

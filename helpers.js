@@ -25,7 +25,7 @@ const getStats = (chatId, amount) => {
     )
     .all(chatId, amount || 5);
 
-      console.log(last_10_rows)
+  console.log(last_10_rows);
 
   last_10_rows.forEach((row, index) => {
     message += `${index + 1}: ${row.message} ${row.language} ${
@@ -35,7 +35,18 @@ const getStats = (chatId, amount) => {
   return last_10_rows ? message : "No stats yet :(";
 };
 
+const hasUserOptedOut = (userId) => {
+  const optOut = sql
+    .prepare(`SELECT * FROM optouts WHERE userId = ?`)
+    .all(userId);
+
+  if (optOut.length !== 0) return true;
+
+  return false;
+};
+
 module.exports = {
   saveToDb,
   getStats,
+  hasUserOptedOut,
 };
