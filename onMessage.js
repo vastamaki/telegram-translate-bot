@@ -6,7 +6,8 @@ const translate = new Translate({
 const { saveToDb, getStats, hasUserOptedOut } = require("./helpers.js");
 
 const onMessage = async (msg, bot) => {
-  const optOut = hasUserOptedOut(msg.from.id);
+  const userId = msg.from.id;
+  const optOut = hasUserOptedOut(userId);
   if (optOut) return;
 
   const chatId = msg.chat.id;
