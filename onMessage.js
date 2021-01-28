@@ -41,7 +41,7 @@ const onMessage = async (msg, bot) => {
 
   if (
     detection.language &&
-    (detection.language === "fi" || detection.language === "pl")
+    (detection.language === "fi" || detection.language === "pl" || detection.language === "hu")
   ) {
     const [translation] = await translate.translate(
       message,
