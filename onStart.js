@@ -1,5 +1,5 @@
 const SQLite = require("better-sqlite3");
-const sql = new SQLite(`./data.sqlite`);
+const sql = new SQLite(`${__dirname}/data.sqlite`);
 
 const onStart = async () => {
   sql
