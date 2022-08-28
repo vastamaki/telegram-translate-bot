@@ -1,7 +1,8 @@
-const SQLite = require("better-sqlite3");
-const sql = new SQLite(`${__dirname}/data.sqlite`);
+import { Database } from "bun:sqlite";
 
-const saveToDb = (data, table) => {
+const sql = new Database("data.sqlite");
+
+export const saveToDb = (data, table) => {
   const keys = Object.keys(data);
   let insert = "";
   Object.keys(data).forEach((i, idx, array) => {
@@ -14,13 +15,13 @@ const saveToDb = (data, table) => {
   const sqlQuery = `INSERT INTO ${table} (${keys.map(
     (key) => `${key}`
   )}) VALUES (${insert})`;
-  sql.prepare(sqlQuery).run();
+  sql.run(sqlQuery);
 };
 
-const getStats = (chatId, amount) => {
+export const getStats = (chatId, amount) => {
   let message = "";
   const last_10_rows = sql
-    .prepare(
+    .query(
       `SELECT * FROM translations WHERE chatId = ? ORDER BY timestamp DESC LIMIT ?`
     )
     .all(chatId, amount || 5);
@@ -35,18 +36,12 @@ const getStats = (chatId, amount) => {
   return last_10_rows ? message : "No stats yet :(";
 };
 
-const hasUserOptedOut = (userId) => {
+export const hasUserOptedOut = (userId) => {
   const optOut = sql
-    .prepare(`SELECT * FROM optouts WHERE userId = ?`)
+    .query(`SELECT * FROM optouts WHERE userId = ?`)
     .all(userId);
 
   if (optOut.length !== 0) return true;
 
   return false;
-};
-
-module.exports = {
-  saveToDb,
-  getStats,
-  hasUserOptedOut,
 };

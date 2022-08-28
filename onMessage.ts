@@ -1,11 +1,12 @@
-const { Translate } = require("@google-cloud/translate").v2;
-const { gcloud } = require("./secrets.json");
-const translate = new Translate({
-  key: gcloud,
-});
-const { saveToDb, getStats, hasUserOptedOut } = require("./helpers.js");
+import { v2 } from "@google-cloud/translate";
 
-const onMessage = async (msg, bot) => {
+import { getStats, hasUserOptedOut, saveToDb } from "./helpers";
+
+const translate = new v2.Translate({
+  key: process.env.gcloud,
+});
+
+export const onMessage = async (msg, bot) => {
   const userId = msg.from.id;
   const optOut = hasUserOptedOut(userId);
   if (optOut) return;
@@ -41,7 +42,9 @@ const onMessage = async (msg, bot) => {
 
   if (
     detection.language &&
-    (detection.language === "fi" || detection.language === "pl" || detection.language === "hu")
+    (detection.language === "fi" ||
+      detection.language === "pl" ||
+      detection.language === "hu")
   ) {
     const [translation] = await translate.translate(
       message,
@@ -60,8 +63,4 @@ const onMessage = async (msg, bot) => {
     },
     "translations"
   );
-};
-
-module.exports = {
-  onMessage,
 };
