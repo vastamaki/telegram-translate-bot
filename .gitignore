@@ -1,4 +1,4 @@
 /node_modules
 secrets.json
 data.sqlite
-.env
+stack.env

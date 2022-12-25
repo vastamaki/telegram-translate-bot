@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  translate-bot:
+    container_name: translate-bot
+    build:
+      dockerfile: Dockerfile
+    env_file:
+      - stack.env
+    restart: unless-stopped
+    networks:
+      - mariadb
+
+networks:
+  mariadb:
+    name: MariaDB
+    external: true
