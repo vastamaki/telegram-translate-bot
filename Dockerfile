@@ -8,4 +8,4 @@ RUN npm install
 
 COPY . .
 
-CMD ["npx", "tsx" "index.ts"]
+CMD ["npm", "start"]

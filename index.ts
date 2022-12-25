@@ -5,19 +5,6 @@ import knex from "knex";
 import { v2 } from "@google-cloud/translate";
 import TelegramBot from "node-telegram-bot-api";
 
-declare var process: {
-  env: {
-    DB_HOST: string;
-    DB_PORT: number;
-    DB_USER: string;
-    DB_PASS: string;
-    DB_NAME: string;
-    DB_DB: string;
-    GCLOUD_KEY: string;
-    TG_TOKEN: string;
-  };
-};
-
 const bot = new TelegramBot(process.env.TG_TOKEN, { polling: true });
 
 const translate = new v2.Translate({
@@ -28,7 +15,7 @@ const db = knex({
   client: "mysql",
   connection: {
     host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    port: process.env.DB_PORT as unknown as number,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_DB,
@@ -37,6 +24,10 @@ const db = knex({
     min: 1,
     max: 1,
   },
+});
+
+process.on("uncaughtException", async () => {
+  console.error("error");
 });
 
 bot.on("message", async (msg: TelegramBot.Message) => {
@@ -75,14 +66,18 @@ const onMessage = async (msg: TelegramBot.Message, bot: TelegramBot) => {
 
   switch (message) {
     case (message.match(/^!optout/) || {}).input:
-      await db("optouts").insert({
-        userId,
-        reason: message.replace("!optout", ""),
-      });
-      await bot.sendMessage(
-        chatId,
-        "Hey, the spyware is now permanently disabled from your account."
-      );
+      try {
+        await db("optouts").insert({
+          userId,
+          reason: message.replace("!optout", ""),
+        });
+        await bot.sendMessage(
+          chatId,
+          "Hey, the spyware is now permanently disabled from your account!"
+        );
+      } catch {
+        console.error("Failed to optout");
+      }
       break;
     case (message.match(/^!stats/) || {}).input:
       const amount = message.split(" ");
@@ -90,7 +85,7 @@ const onMessage = async (msg: TelegramBot.Message, bot: TelegramBot) => {
       await bot.sendMessage(chatId, stats);
       break;
     case (message.match(/^hey hackerman/) || {}).input:
-      bot.sendMessage(chatId, "Hi");
+      await bot.sendMessage(chatId, "Hi");
       break;
     default:
       break;
@@ -99,16 +94,20 @@ const onMessage = async (msg: TelegramBot.Message, bot: TelegramBot) => {
   let [detection] = await translate.detect(message);
 
   if (["fi", "pl"].includes(detection.language)) {
-    const [translation] = await translate.translate(
-      message,
-      detection.language === "fi" ? "pl" : "fi"
-    );
-    await bot.sendMessage(chatId, translation);
+    try {
+      const [translation] = await translate.translate(
+        message,
+        detection.language === "fi" ? "pl" : "fi"
+      );
+      await bot.sendMessage(chatId, translation);
+    } catch {
+      console.error("Failed to translate/send message");
+    }
   }
 
   await db("translations").insert({
     chatId,
-    username: msg.chat.username,
+    username: msg.chat.username || msg.from.username,
     message,
     accuracy: detection.confidence,
     language: detection.language ? detection.language : undefined,

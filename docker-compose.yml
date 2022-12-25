@@ -3,6 +3,7 @@ version: '3'
 services:
   translate-bot:
     container_name: translate-bot
+    pull_policy: build
     build:
       dockerfile: Dockerfile
     env_file:
