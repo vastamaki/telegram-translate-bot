@@ -11,18 +11,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/translate": "^7.0.5",
-    "@types/dotenv": "^8.2.0",
+    "@google-cloud/translate": "^8.5.1",
+    "@types/dotenv": "^8.2.3",
     "@types/knex": "^0.16.1",
-    "@types/mysql": "^2.15.21",
-    "@types/node-telegram-bot-api": "^0.57.6",
-    "dotenv": "^16.0.3",
-    "knex": "^2.3.0",
-    "mysql": "^2.18.1",
-    "node-telegram-bot-api": "^0.60.0"
+    "@types/node-telegram-bot-api": "^0.64.7",
+    "dotenv": "^16.4.7",
+    "knex": "^3.1.0",
+    "mysql2": "^3.12.0",
+    "node-telegram-bot-api": "^0.66.0"
   },
   "target": "es2016",
   "devDependencies": {
-    "tsx": "^3.12.1"
+    "tsx": "^4.19.3"
   }
 }
